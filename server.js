@@ -9,7 +9,7 @@ const db = require("./db/db.json")
 const app = express();
 
 // PORT for incoming request
-const PORT = process.env.PORT || 3306;
+const PORT = process.env.PORT || 8080;
 
 // Setup for Express data parsing/Middleware
 const rootObj = { root: __dirname + "/public" };
