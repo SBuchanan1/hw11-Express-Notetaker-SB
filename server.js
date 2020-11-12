@@ -1,64 +1,61 @@
-// Dependencies
+const fs = require("fs");
+
 const express = require("express");
-const apiRoutes = require("./routes/apiRoutes");
-const htmlRoutes = require("./routes/htmlRoutes");
-// const fs = require("fs");
-// const path = require("path");
-// const db = require("./db/db.json")
-
-
-// Var for Express
+const path = require("path");
 const app = express();
-
-// PORT for incoming request
 const PORT = process.env.PORT || 3000;
-
-// Setup for Express data parsing/Middleware
-const rootObj = { root: __dirname + "/public" };
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static("public"));
 
-app.use("/api", apiRoutes);
-app.use("/", htmlRoutes);
+app.get("/", function (req, res) {
+  res.sendFile(path.join(__dirname, "public", "index.html"));
+});
 
-// Server the app is listening on
-app.listen(PORT, () => console.log(`Listening on PORT: ${PORT}`));
+app.get("/notes", function (req, res) {
+  res.sendFile(path.join(__dirname, "public", "notes.html"));
+});
 
-// app.get("/", (res, req) => res.sendFile("/index.html", rootObj));
+app.get("/api/notes", function (req, res) {
+  return res.sendFile(path.join(__dirname, "db/db.json"));
+});
 
-// app.get("/notes", (req, res) => res.sendFile("/notes.html", rootObj));
-// app.get("/api/notes", (req, res) => {
-//     // console.log("/api/notesget")
-//     let json = getJson();
-//     console.log(json);
-//     res.json(json);
-// })
+app.listen(PORT, () => {
+  console.log(`Server Listening on Port ${PORT}`);
+});
 
-// app.post("/api/notes", (req, res) => {
-//     // console.log("./api/notespost")
-//     // console.log(req.body);
-//     addNoteToJSON(req.body)
-//     res.json(getJson());
-// })
+app.post("/api/notes", function (req, res) {
+  try {
+    notesData = fs.readFileSync("./db/db.json", "utf8");
+    console.log(notesData);
+    notesData = JSON.parse(notesData);
+    req.body.id = notesData.length;
+    notesData.push(req.body);
+    notesData = JSON.stringify(notesData);
+    fs.writeFile("./db/db.json", notesData, "utf8", function (err) {
+      if (err) throw err;
+    });
 
-// app.delete("/api/notes/id:", (req, res) => {
-//     // console.log("/api/notes/id:delete")
-//     deleteNoteToJSON(req.params.id);
-//     res.json(getJson());
-// })
+    res.json(JSON.parse(notesData));
+  } catch (err) {
+    throw err;
+  }
+});
 
-// // Inherting files
-// require("./routes/apiRoutes")(app);
-// require("./routes/htmlRoutes")(app);
-
-// // Server request & console log 
-// app.listen(PORT, function () {
-//     console.log("App is listening on: http://localhost" + PORT);
-// });
-
-// function getJson() {
-//     let data = fs.readFileSync(_dirname = "/db/db.json", data);
-
-// }
+app.delete("/api/notes/:id", function (req, res) {
+  try {
+    notesData = fs.readFileSync("./db/db.json", "utf8");
+    notesData = JSON.parse(notesData);
+    notesData = notesData.filter(function (note) {
+      return note.id != req.params.id;
+    });
+    notesData = JSON.stringify(notesData);
+    fs.writeFile("./db/db.json", notesData, "utf8", function (err) {
+      if (err) throw err;
+    });
+    res.send(JSON.parse(notesData));
+  } catch (err) {
+    throw err;
+  }
+});
