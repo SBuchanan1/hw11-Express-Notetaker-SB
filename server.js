@@ -27,17 +27,17 @@ app.listen(PORT, () => {
 
 app.post("/api/notes", function (req, res) {
   try {
-    notesData = fs.readFileSync("./db/db.json", "utf8");
-    console.log(notesData);
-    notesData = JSON.parse(notesData);
-    req.body.id = notesData.length;
-    notesData.push(req.body);
-    notesData = JSON.stringify(notesData);
-    fs.writeFile("./db/db.json", notesData, "utf8", function (err) {
+    keyData = fs.readFileSync("./db/db.json", "utf8");
+    console.log(keyData);
+    keyData = JSON.parse(keyData);
+    req.body.id = keyData.length;
+    keyData.push(req.body);
+    notesData = JSON.stringify(keyData);
+    fs.writeFile("./db/db.json", keyData, "utf8", function (err) {
       if (err) throw err;
     });
 
-    res.json(JSON.parse(notesData));
+    res.json(JSON.parse(keyData));
   } catch (err) {
     throw err;
   }
@@ -45,16 +45,16 @@ app.post("/api/notes", function (req, res) {
 
 app.delete("/api/notes/:id", function (req, res) {
   try {
-    notesData = fs.readFileSync("./db/db.json", "utf8");
-    notesData = JSON.parse(notesData);
-    notesData = notesData.filter(function (note) {
+    keyData = fs.readFileSync("./db/db.json", "utf8");
+    keyData = JSON.parse(notesData);
+    keyData = keyData.filter(function (note) {
       return note.id != req.params.id;
     });
-    notesData = JSON.stringify(notesData);
-    fs.writeFile("./db/db.json", notesData, "utf8", function (err) {
+    keyData = JSON.stringify(keyData);
+    fs.writeFile("./db/db.json", keyData, "utf8", function (err) {
       if (err) throw err;
     });
-    res.send(JSON.parse(notesData));
+    res.send(JSON.parse(keyData));
   } catch (err) {
     throw err;
   }
