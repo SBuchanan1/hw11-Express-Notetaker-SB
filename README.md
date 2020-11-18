@@ -14,4 +14,8 @@ None
 
 ## Routes
 
+## Contributors
+
+Sydney Buchanan
+
 API should GET notes POST them and DELETE them
