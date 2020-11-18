@@ -1,27 +1,56 @@
-const router = require("express").Router();
-const store = require("../db/store");
+const path = require("path");
+const fs = require("fs");
 
-// GET "/api/notes" responds with all notes from the database
-router.get("/notes", (req, res) => {
-  store
-    .getNotes()
-    .then((notes) => res.json(notes))
-    .catch((err) => res.status(500).json(err));
-});
+// Auto parse the JSON file, stores it in cache
+const notesDB = require("../db/db.json");
 
-router.post("/notes", (req, res) => {
-  store
-    .addNote(req.body)
-    .then((note) => res.json(note))
-    .catch((err) => res.status(500).json(err));
-});
+const pathNotesDB = path.join(__dirname, "../db/db.json");
 
-// DELETE "/api/notes" deletes the note with an id equal to req.params.id
-router.delete("/notes/:id", (req, res) => {
-  store
-    .removeNote(req.params.id)
-    .then(() => res.json({ ok: true }))
-    .catch((err) => res.status(500).json(err));
-});
+// API Calls
 
-module.exports = router;
+module.exports = function (app) {
+  // GET requests
+  app.get("/api/notes", function (req, res) {
+    res.sendFile(pathNotesDB);
+  });
+
+  // POST 
+  app.post("/api/notes", function (req, res) {
+    try {
+      notesID = 0;
+      notesDB.forEach((note) => {
+        notesID++;
+        note.id = notesID;
+      });
+
+      req.body.id = notesDB.length + 1;
+      notesDB.push(req.body);
+
+      fs.writeFile(pathNotesDB, JSON.stringify(notesDB), (err) => {
+        if (err) throw err;
+      });
+
+      res.json(req.body);
+    } catch (err) {
+      console.log("Darn monkeys, they left a mess of things");
+      console.log(err);
+    }
+  });
+
+  //   DELETE 
+
+  app.delete("/api/notes/:id", function (req, res) {
+    try {
+      notesData = fs.readFileSync(pathNotesDB, "utf8");
+      parsedNotes = JSON.parse(notesData);
+      newNotesArr = parsedNotes.filter((note) => note.id != req.params.id);
+      fs.writeFile(pathNotesDB, JSON.stringify(newNotesArr), "utf8", (err) => {
+        if (err) throw err;
+      });
+      res.json(newNotesArr);
+    } catch (err) {
+      console.log("Darn monkeys they left a mess of things");
+      console.log(err);
+    }
+  });
+};
