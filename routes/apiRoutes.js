@@ -1,27 +1,59 @@
-const router = require("express").Router();
-const store = require("../db/store");
+const db = require("../db/db.json");
+const fs = require("fs");
+const path = require("path");
 
-// GET "/api/notes" responds with all notes from the database
-router.get("/notes", (req, res) => {
-  store
-    .getNotes()
-    .then((notes) => res.json(notes))
-    .catch((err) => res.status(500).json(err));
-});
 
-router.post("/notes", (req, res) => {
-  store
-    .addNote(req.body)
-    .then((note) => res.json(note))
-    .catch((err) => res.status(500).json(err));
-});
+module.exports = function (app) {
+  // GET 
+  app.get("/api/notes", function (req, res) {
+    fs.readFile(path.join(__dirname, "../db/db.json"), "utf-8", function (err, data) {
+      if (err) throw err;
 
-// DELETE "/api/notes" deletes the note with an id equal to req.params.id
-router.delete("/notes/:id", (req, res) => {
-  store
-    .removeNote(req.params.id)
-    .then(() => res.json({ ok: true }))
-    .catch((err) => res.status(500).json(err));
-});
+      res.json(JSON.parse(data));
+    });
+  });
 
-module.exports = router;
+  // POST
+  app.post("/api/notes", function (req, res) {
+    fs.readFile(path.join(__dirname, "../db/db.json"), "utf-8", function (err, data) {
+      if (err) throw err;
+
+      const json = JSON.parse(data);
+
+      json.push(req.body);
+
+      fs.writeFile(path.join(__dirname, "../db/db.json"), JSON.stringify(json), function (err) {
+        if (err) throw err;
+
+        console.log("successfully wrote to db");
+      });
+    });
+
+
+
+    res.json(req.body);
+  });
+
+  // DELETE
+  app.delete("/api/notes/:id", function (req, res) {
+    let noteID = req.params.id;
+
+    fs.readFile(path.join(__dirname, "../db/db.json"), "utf-8", function (err, data) {
+      if (err) throw err;
+
+      const json = JSON.parse(data);
+
+      const newJson = json.filter(note => note.id !== noteID);
+
+      fs.writeFile(path.join(__dirname, "../db/db.json"), JSON.stringify(newJson), function (err) {
+        if (err) throw err;
+
+        console.log("successfully deleted, and wrote to db");
+      });
+    });
+
+    res.sendStatus(200);
+
+
+  });
+}
