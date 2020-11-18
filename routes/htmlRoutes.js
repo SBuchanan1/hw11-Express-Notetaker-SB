@@ -1,14 +1,14 @@
-// Import path package
 const path = require("path");
+const router = require("express").Router();
 
-// ROUTING
-module.exports = function (app) {
+// "/notes" responds with the notes.html file
+router.get("/notes", (req, res) => {
+  res.sendFile(path.join(__dirname, "../public/notes.html"));
+});
 
-  app.get("/notes", function (req, res) {
-    res.sendFile(path.join(__dirname, "../public/notes.html"));
-  });
+// All other routes respond with the index.html file
+router.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "../public/index.html"));
+});
 
-  app.get("*", function (req, res) {
-    res.sendFile(path.join(__dirname, "../public/index.html"));
-  });
-}
+module.exports = router;
