@@ -19,3 +19,7 @@ None
 Sydney Buchanan
 
 API should GET notes POST them and DELETE them
+
+---
+
+If you have any additional questions, please feel free to reach me at syd.buch@gmail.com
